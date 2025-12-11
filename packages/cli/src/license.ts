@@ -24,6 +24,9 @@ import { N8N_VERSION, SETTINGS_LICENSE_CERT_KEY } from './constants';
 const LICENSE_RENEWAL_DISABLED_WARNING =
 	'Automatic license renewal is disabled. The license will not renew automatically, and access to licensed features may be lost!';
 
+// Cache quota features to avoid repeated allocation
+const QUOTA_FEATURES = Object.values(LICENSE_QUOTAS);
+
 export type FeatureReturnType = Partial<
 	{
 		planName: string;
@@ -385,8 +388,7 @@ export class License implements LicenseProvider {
 		}
 		
 		// Check if this is a quota (numeric feature)
-		const quotaFeatures = Object.values(LICENSE_QUOTAS);
-		if (quotaFeatures.includes(feature as NumericLicenseFeature)) {
+		if (QUOTA_FEATURES.includes(feature as NumericLicenseFeature)) {
 			// Return unlimited quota for numeric features
 			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
 		}

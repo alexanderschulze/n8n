@@ -11,6 +11,9 @@ class ProviderNotSetError extends UnexpectedError {
 	}
 }
 
+// Cache quota features to avoid repeated allocation
+const QUOTA_FEATURES = Object.values(LICENSE_QUOTAS);
+
 @Service()
 export class LicenseState {
 	licenseProvider: LicenseProvider | null = null;
@@ -42,8 +45,7 @@ export class LicenseState {
 		}
 		
 		// Check if this is a quota (numeric feature)
-		const quotaFeatures = Object.values(LICENSE_QUOTAS);
-		if (quotaFeatures.includes(feature as NumericLicenseFeature)) {
+		if (QUOTA_FEATURES.includes(feature as NumericLicenseFeature)) {
 			// Return unlimited quota for numeric features
 			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
 		}
