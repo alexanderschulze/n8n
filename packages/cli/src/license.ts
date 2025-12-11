@@ -388,7 +388,8 @@ export class License implements LicenseProvider {
 		}
 		
 		// Check if this is a quota (numeric feature)
-		if (QUOTA_FEATURES.includes(feature as NumericLicenseFeature)) {
+		// Type assertion is safe here because we're checking membership in QUOTA_FEATURES
+		if (QUOTA_FEATURES.includes(feature as string as NumericLicenseFeature)) {
 			// Return unlimited quota for numeric features
 			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
 		}
