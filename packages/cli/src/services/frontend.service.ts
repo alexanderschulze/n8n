@@ -1,7 +1,7 @@
 import type { FrontendSettings, ITelemetrySettings, N8nEnvFeatFlags } from '@n8n/api-types';
 import { LicenseState, Logger, ModuleRegistry } from '@n8n/backend-common';
 import { GlobalConfig, SecurityConfig } from '@n8n/config';
-import { LICENSE_FEATURES } from '@n8n/constants';
+import { LICENSE_FEATURES, UNLIMITED_LICENSE_QUOTA } from '@n8n/constants';
 import { Container, Service } from '@n8n/di';
 import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
@@ -228,7 +228,7 @@ export class FrontendService {
 				this.globalConfig.personalization.enabled && this.globalConfig.diagnostics.enabled,
 			defaultLocale: this.globalConfig.defaultLocale,
 			userManagement: {
-				quota: this.license.getUsersLimit(),
+				quota: UNLIMITED_LICENSE_QUOTA,
 				showSetupOnFirstLoad: !(await this.ownershipService.hasInstanceOwner()),
 				smtpSetup: this.mailer.isEmailSetUp,
 				authenticationMethod: getCurrentAuthenticationMethod(),
@@ -263,8 +263,8 @@ export class FrontendService {
 			logLevel: this.globalConfig.logging.level,
 			hiringBannerEnabled: this.globalConfig.hiringBanner.enabled,
 			aiAssistant: {
-				enabled: false,
-				setup: false,
+				enabled: true,
+				setup: true,
 			},
 			templates: {
 				enabled: this.globalConfig.templates.enabled,
@@ -286,35 +286,35 @@ export class FrontendService {
 				external: process.env.NODE_FUNCTION_ALLOW_EXTERNAL?.split(',') ?? undefined,
 			},
 			enterprise: {
-				sharing: false,
-				ldap: false,
-				saml: false,
-				oidc: false,
-				mfaEnforcement: false,
-				logStreaming: false,
-				advancedExecutionFilters: false,
-				variables: false,
-				sourceControl: false,
-				auditLogs: false,
-				externalSecrets: false,
+				sharing: true,
+				ldap: true,
+				saml: true,
+				oidc: true,
+				mfaEnforcement: true,
+				logStreaming: true,
+				advancedExecutionFilters: true,
+				variables: true,
+				sourceControl: true,
+				auditLogs: true,
+				externalSecrets: true,
 				showNonProdBanner: false,
-				debugInEditor: false,
-				binaryDataS3: false,
-				workerView: false,
-				advancedPermissions: false,
-				apiKeyScopes: false,
-				workflowDiffs: false,
-				provisioning: false,
+				debugInEditor: true,
+				binaryDataS3: true,
+				workerView: true,
+				advancedPermissions: true,
+				apiKeyScopes: true,
+				workflowDiffs: true,
+				provisioning: true,
 				projects: {
 					team: {
-						limit: 0,
+						limit: UNLIMITED_LICENSE_QUOTA,
 					},
 				},
-				customRoles: false,
+				customRoles: true,
 			},
 			mfa: {
-				enabled: false,
-				enforced: false,
+				enabled: true,
+				enforced: true,
 			},
 			hideUsagePage: this.globalConfig.hideUsagePage,
 			license: {
@@ -322,21 +322,21 @@ export class FrontendService {
 				environment: this.globalConfig.license.tenantId === 1 ? 'production' : 'staging',
 			},
 			variables: {
-				limit: 0,
+				limit: UNLIMITED_LICENSE_QUOTA,
 			},
 			banners: {
 				dismissed: [],
 			},
 			askAi: {
-				enabled: false,
+				enabled: true,
 			},
 			aiBuilder: {
-				enabled: false,
-				setup: false,
+				enabled: true,
+				setup: true,
 			},
 			aiCredits: {
-				enabled: false,
-				credits: 0,
+				enabled: true,
+				credits: UNLIMITED_LICENSE_QUOTA,
 			},
 			workflowHistory: {
 				pruneTime: getWorkflowHistoryPruneTime(),
@@ -352,10 +352,10 @@ export class FrontendService {
 			},
 			easyAIWorkflowOnboarded: false,
 			folders: {
-				enabled: false,
+				enabled: true,
 			},
 			evaluation: {
-				quota: this.licenseState.getMaxWorkflowsWithEvaluations(),
+				quota: UNLIMITED_LICENSE_QUOTA,
 			},
 			activeModules: this.moduleRegistry.getActiveModules(),
 			envFeatureFlags: this.collectEnvFeatureFlags(),

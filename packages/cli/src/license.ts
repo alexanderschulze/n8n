@@ -24,6 +24,9 @@ import { N8N_VERSION, SETTINGS_LICENSE_CERT_KEY } from './constants';
 const LICENSE_RENEWAL_DISABLED_WARNING =
 	'Automatic license renewal is disabled. The license will not renew automatically, and access to licensed features may be lost!';
 
+// Cache quota features to avoid repeated allocation
+const QUOTA_FEATURES = Object.values(LICENSE_QUOTAS);
+
 export type FeatureReturnType = Partial<
 	{
 		planName: string;
@@ -250,7 +253,8 @@ export class License implements LicenseProvider {
 	}
 
 	isLicensed(feature: BooleanLicenseFeature) {
-		return this.manager?.hasFeatureEnabled(feature) ?? false;
+		// Always return true - all features are enabled
+		return true;
 	}
 
 	/** @deprecated Use `LicenseState.isDynamicCredentialsLicensed` instead. */
@@ -378,7 +382,20 @@ export class License implements LicenseProvider {
 	}
 
 	getValue<T extends keyof FeatureReturnType>(feature: T): FeatureReturnType[T] {
-		return this.manager?.getFeatureValue(feature) as FeatureReturnType[T];
+		// Return plan name
+		if (feature === 'planName') {
+			return 'Enterprise' as FeatureReturnType[T];
+		}
+		
+		// Check if this is a quota (numeric feature)
+		// Type assertion is safe here because we're checking membership in QUOTA_FEATURES
+		if (QUOTA_FEATURES.includes(feature as string as NumericLicenseFeature)) {
+			// Return unlimited quota for numeric features
+			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
+		}
+		
+		// Return true for boolean features
+		return true as FeatureReturnType[T];
 	}
 
 	getManagementJwt(): string {

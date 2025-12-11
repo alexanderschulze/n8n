@@ -1,5 +1,5 @@
-import type { BooleanLicenseFeature } from '@n8n/constants';
-import { LICENSE_FEATURES, UNLIMITED_LICENSE_QUOTA } from '@n8n/constants';
+import type { BooleanLicenseFeature, NumericLicenseFeature } from '@n8n/constants';
+import { LICENSE_FEATURES, LICENSE_QUOTAS, UNLIMITED_LICENSE_QUOTA } from '@n8n/constants';
 import { Service } from '@n8n/di';
 import { UnexpectedError } from 'n8n-workflow';
 
@@ -10,6 +10,9 @@ class ProviderNotSetError extends UnexpectedError {
 		super('Cannot query license state because license provider has not been set');
 	}
 }
+
+// Cache quota features to avoid repeated allocation
+const QUOTA_FEATURES = Object.values(LICENSE_QUOTAS);
 
 @Service()
 export class LicenseState {
@@ -31,23 +34,25 @@ export class LicenseState {
 	 * If the feature is an array of strings, it checks if any of the features are licensed
 	 */
 	isLicensed(feature: BooleanLicenseFeature | BooleanLicenseFeature[]) {
-		this.assertProvider();
-
-		if (typeof feature === 'string') return this.licenseProvider.isLicensed(feature);
-
-		for (const featureName of feature) {
-			if (this.licenseProvider.isLicensed(featureName)) {
-				return true;
-			}
-		}
-
-		return false;
+		// Always return true - all features are enabled
+		return true;
 	}
 
 	getValue<T extends keyof FeatureReturnType>(feature: T): FeatureReturnType[T] {
-		this.assertProvider();
-
-		return this.licenseProvider.getValue(feature);
+		// Return plan name
+		if (feature === 'planName') {
+			return 'Enterprise' as FeatureReturnType[T];
+		}
+		
+		// Check if this is a quota (numeric feature)
+		// Type assertion is safe here because we're checking membership in QUOTA_FEATURES
+		if (QUOTA_FEATURES.includes(feature as string as NumericLicenseFeature)) {
+			// Return unlimited quota for numeric features
+			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
+		}
+		
+		// Return true for boolean features
+		return true as FeatureReturnType[T];
 	}
 
 	// --------------------
@@ -199,7 +204,7 @@ export class LicenseState {
 	}
 
 	getMaxAiCredits() {
-		return this.getValue('quota:aiCredits') ?? 0;
+		return this.getValue('quota:aiCredits') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getWorkflowHistoryPruneQuota() {
@@ -207,22 +212,22 @@ export class LicenseState {
 	}
 
 	getInsightsMaxHistory() {
-		return this.getValue('quota:insights:maxHistoryDays') ?? 7;
+		return this.getValue('quota:insights:maxHistoryDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getInsightsRetentionMaxAge() {
-		return this.getValue('quota:insights:retention:maxAgeDays') ?? 180;
+		return this.getValue('quota:insights:retention:maxAgeDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getInsightsRetentionPruneInterval() {
-		return this.getValue('quota:insights:retention:pruneIntervalDays') ?? 24;
+		return this.getValue('quota:insights:retention:pruneIntervalDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getMaxTeamProjects() {
-		return this.getValue('quota:maxTeamProjects') ?? 0;
+		return this.getValue('quota:maxTeamProjects') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getMaxWorkflowsWithEvaluations() {
-		return this.getValue('quota:evaluations:maxWorkflows') ?? 0;
+		return this.getValue('quota:evaluations:maxWorkflows') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 }
