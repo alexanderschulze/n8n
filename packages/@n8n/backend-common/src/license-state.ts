@@ -203,7 +203,7 @@ export class LicenseState {
 	}
 
 	getMaxAiCredits() {
-		return this.getValue('quota:aiCredits') ?? 0;
+		return this.getValue('quota:aiCredits') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getWorkflowHistoryPruneQuota() {
@@ -211,22 +211,22 @@ export class LicenseState {
 	}
 
 	getInsightsMaxHistory() {
-		return this.getValue('quota:insights:maxHistoryDays') ?? 7;
+		return this.getValue('quota:insights:maxHistoryDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getInsightsRetentionMaxAge() {
-		return this.getValue('quota:insights:retention:maxAgeDays') ?? 180;
+		return this.getValue('quota:insights:retention:maxAgeDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getInsightsRetentionPruneInterval() {
-		return this.getValue('quota:insights:retention:pruneIntervalDays') ?? 24;
+		return this.getValue('quota:insights:retention:pruneIntervalDays') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getMaxTeamProjects() {
-		return this.getValue('quota:maxTeamProjects') ?? 0;
+		return this.getValue('quota:maxTeamProjects') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 
 	getMaxWorkflowsWithEvaluations() {
-		return this.getValue('quota:evaluations:maxWorkflows') ?? 0;
+		return this.getValue('quota:evaluations:maxWorkflows') ?? UNLIMITED_LICENSE_QUOTA;
 	}
 }
