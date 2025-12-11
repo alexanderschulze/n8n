@@ -379,12 +379,20 @@ export class License implements LicenseProvider {
 	}
 
 	getValue<T extends keyof FeatureReturnType>(feature: T): FeatureReturnType[T] {
-		// Return unlimited quotas for all features
+		// Return plan name
 		if (feature === 'planName') {
 			return 'Enterprise' as FeatureReturnType[T];
 		}
-		// Return unlimited quota for numeric features
-		return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
+		
+		// Check if this is a quota (numeric feature)
+		const quotaFeatures = Object.values(LICENSE_QUOTAS);
+		if (quotaFeatures.includes(feature as NumericLicenseFeature)) {
+			// Return unlimited quota for numeric features
+			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
+		}
+		
+		// Return true for boolean features
+		return true as FeatureReturnType[T];
 	}
 
 	getManagementJwt(): string {
